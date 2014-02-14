@@ -17,6 +17,7 @@ $(document).ready(function () {
 
     var scene = new THREE.Scene(),
         camera = new THREE.PerspectiveCamera(FOV, ASPECT, NEAR, FAR),
+        projector = new THREE.Projector(),
         renderer = new THREE.WebGLRenderer();
 
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -34,10 +35,44 @@ $(document).ready(function () {
 
     scene.add(sphere);
 
+    var rotateStart = new THREE.Vector2(),
+        rotateEnd = new THREE.Vector2(),
+        rotateDelta = new THREE.Vector2(),
+        rotateAngle = new THREE.Vector2(),
+        isRotating = false;
+
+    $(renderer.domElement).mousedown(function (e) {
+        if (!isRotating) { 
+            isRotating = true;
+            rotateStart.set(e.pageX, e.pageY);
+        }
+    });
+
+    $(renderer.domElement).mousemove(function (e) {
+        if (isRotating) {
+            rotateEnd.set(e.pageX, e.pageY);
+            rotateDelta.subVectors(rotateEnd, rotateStart).divideScalar(750);
+
+            rotateStart = rotateEnd.clone();
+
+            camera.rotateOnAxis(new THREE.Vector3(1, 0, 0), rotateDelta.y);
+            camera.rotateOnAxis(new THREE.Vector3(0, 1, 0), rotateDelta.x);
+
+            /*
+            camera.rotation.x += rotateDelta.y;
+            camera.rotation.y += rotateDelta.x;
+            */
+
+            console.log(camera.rotation);
+        }
+    });
+
+    $(renderer.domElement).mouseup(function (e) {
+        isRotating = false;
+    });
+
     var render = function () {
         requestAnimationFrame(render);
-
-        sphere.rotation.y += 0.01;
 
         renderer.render(scene, camera);
     };
