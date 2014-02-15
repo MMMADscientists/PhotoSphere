@@ -3,6 +3,15 @@ var PhotoSphere = function (geometry, material) {
 
     this.material.side = THREE.BackSide;
     this.material.overdraw = true;
+
+    // test object attach
+    var cube = new THREE.Mesh(
+            new THREE.CubeGeometry(1, 1, 1),
+            new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+
+    cube.position.z = -10;
+
+    this.add(cube);
 };
 PhotoSphere.prototype = Object.create(THREE.Mesh.prototype);
 
@@ -55,15 +64,18 @@ $(document).ready(function () {
 
             rotateStart = rotateEnd.clone();
 
+            sphere.rotation.x -= rotateDelta.y;
+            sphere.rotation.y -= rotateDelta.x;
+
+            /*
             camera.rotateOnAxis(new THREE.Vector3(1, 0, 0), rotateDelta.y);
             camera.rotateOnAxis(new THREE.Vector3(0, 1, 0), rotateDelta.x);
+            */
 
             /*
             camera.rotation.x += rotateDelta.y;
             camera.rotation.y += rotateDelta.x;
             */
-
-            console.log(camera.rotation);
         }
     });
 
