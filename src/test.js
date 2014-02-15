@@ -66,21 +66,29 @@ $(document).ready(function () {
 
             sphere.rotation.x -= rotateDelta.y;
             sphere.rotation.y -= rotateDelta.x;
-
-            /*
-            camera.rotateOnAxis(new THREE.Vector3(1, 0, 0), rotateDelta.y);
-            camera.rotateOnAxis(new THREE.Vector3(0, 1, 0), rotateDelta.x);
-            */
-
-            /*
-            camera.rotation.x += rotateDelta.y;
-            camera.rotation.y += rotateDelta.x;
-            */
         }
     });
 
     $(renderer.domElement).mouseup(function (e) {
         isRotating = false;
+    });
+
+    var scale = 1.25,
+        fov_minimum = 5,
+        fov_maximum = 75;
+
+    $(renderer.domElement).mousewheel(function (e) {
+        e.preventDefault();
+
+        if (e.deltaY > 0) {
+            camera.fov = Math.max(fov_minimum, camera.fov / scale);
+            camera.updateProjectionMatrix();
+        } else if (e.deltaY < 0) {
+            camera.fov = Math.min(fov_maximum, camera.fov * scale);
+            camera.updateProjectionMatrix();
+        }
+
+        console.log(camera.fov);
     });
 
     var render = function () {
