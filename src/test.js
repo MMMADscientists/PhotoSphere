@@ -5,13 +5,13 @@ var PhotoSphere = function (geometry, material) {
     this.material.overdraw = true;
 
     // test object attach
-    var cube = new THREE.Mesh(
+    this.cube = new THREE.Mesh(
             new THREE.CubeGeometry(1, 1, 1),
             new THREE.MeshBasicMaterial({ color: 0xff0000 }));
 
-    cube.position.z = -10;
+    this.cube.position.z = -10;
 
-    this.add(cube);
+    this.add(this.cube);
 };
 PhotoSphere.prototype = Object.create(THREE.Mesh.prototype);
 
@@ -54,6 +54,18 @@ $(document).ready(function () {
         if (!isRotating) { 
             isRotating = true;
             rotateStart.set(e.pageX, e.pageY);
+        }
+
+        var vec = new THREE.Vector3(
+            (e.pageX / window.innerWidth) * 2 - 1,
+            -(e.pageY / window.innerHeight) * 2 + 1,
+            0.5);
+        projector.unprojectVector(vec, camera);
+
+        var raycaster = new THREE.Raycaster(camera.position, vec.sub(camera.position).normalize());
+        var intersects = raycaster.intersectObjects([ sphere.cube ]);
+        if (intersects.length > 0) {
+            intersects[0].object.material.color.setHex(Math.random() * 0x00ff00);
         }
     });
 
