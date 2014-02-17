@@ -1,4 +1,4 @@
-var PhotoSphere = function (radius, widthSegments, heightSegments, texture) {
+PhotoSphere = function (radius, widthSegments, heightSegments, texture) {
     var geometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments),
         material = new THREE.MeshLambertMaterial({ map: texture });
 

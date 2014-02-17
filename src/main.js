@@ -1,22 +1,5 @@
-var PhotoSphere = function (geometry, material) {
-    THREE.Mesh.call(this, geometry, material);
-
-    this.material.side = THREE.BackSide;
-    this.material.overdraw = true;
-
-    // test object attach
-    this.cube = new THREE.Mesh(
-            new THREE.CubeGeometry(1, 1, 1),
-            new THREE.MeshBasicMaterial({ color: 0xff0000 }));
-
-    this.cube.position.z = -10;
-
-    this.add(this.cube);
-};
-PhotoSphere.prototype = Object.create(THREE.Mesh.prototype);
-
 $(document).ready(function () {
-    var FOV = 45,
+    var FOV = 75,
         ASPECT = window.innerWidth / window.innerHeight,
         NEAR = 0.1,
         FAR = 1000,
@@ -33,16 +16,15 @@ $(document).ready(function () {
     $("body").append(renderer.domElement);
 
     var light = new THREE.AmbientLight(0xffffff);
+    scene.add(light);
 
-    scene.add(light)
-
-    var sphere = new PhotoSphere(
-            new THREE.SphereGeometry(RADIUS, WIDTH_SEGMENTS, HEIGHT_SEGMENTS),
-            new THREE.MeshLambertMaterial({
-                map: THREE.ImageUtils.loadTexture($(".texture")[0].src)
-            }));
-
+    var texture = THREE.ImageUtils.loadTexture($(".texture")[0].src),
+        sphere = new PhotoSphere(RADIUS, WIDTH_SEGMENTS, HEIGHT_SEGMENTS, texture);
     scene.add(sphere);
+
+    var DOOR_ROUNDED_TEXTURE = THREE.ImageUtils.loadTexture($("#door")[0].src),
+        connection = new Connection(new THREE.Vector3(0, 0, -10), 0, DOOR_ROUNDED_TEXTURE);
+    sphere.add(connection);
 
     var rotateStart = new THREE.Vector2(),
         rotateEnd = new THREE.Vector2(),
@@ -99,8 +81,6 @@ $(document).ready(function () {
             camera.fov = Math.min(fov_maximum, camera.fov * scale);
             camera.updateProjectionMatrix();
         }
-
-        console.log(camera.fov);
     });
 
     var render = function () {
