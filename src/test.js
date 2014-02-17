@@ -64,7 +64,7 @@ $(document).ready(function () {
 
             rotateStart = rotateEnd.clone();
 
-            sphere.rotation.x -= rotateDelta.y;
+            sphere.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, sphere.rotation.x - rotateDelta.y));
             sphere.rotation.y -= rotateDelta.x;
         }
     });
@@ -75,7 +75,7 @@ $(document).ready(function () {
 
     var scale = 1.25,
         fov_minimum = 5,
-        fov_maximum = 75;
+        fov_maximum = 90;
 
     $(renderer.domElement).mousewheel(function (e) {
         e.preventDefault();
