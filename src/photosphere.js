@@ -1,6 +1,10 @@
-PhotoSphere = function (radius, widthSegments, heightSegments, texture) {
-    var geometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments),
-        material = new THREE.MeshLambertMaterial({ map: texture });
+PhotoSphere = function (texture) {
+    var geometry = new THREE.SphereGeometry(
+            PhotoSphere.RADIUS,
+            PhotoSphere.WIDTH_SEGMENTS,
+            PhotoSphere.HEIGHT_SEGMENTS);
+
+    var material = new THREE.MeshLambertMaterial({ map: texture });
 
     material.side = THREE.BackSide;
     material.overdraw = true;
@@ -55,3 +59,9 @@ PhotoSphere.prototype.onMouseMove = function (e) {
 PhotoSphere.prototype.onMouseUp = function (e) {
     this.isRotating = false;
 };
+
+PhotoSphere.RADIUS = 25;
+
+PhotoSphere.WIDTH_SEGMENTS = 50;
+
+PhotoSphere.HEIGHT_SEGMENTS = 50;

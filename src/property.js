@@ -16,17 +16,15 @@ Property = function () {
 };
 
 Property.prototype.onMouseDown = function (e) {
-    var camera = this.camera;
-
-    $.each(this.scene.children, function (i, child) {
+    this.scene.children.forEach(function (child) {
         if (child instanceof PhotoSphere) {
-            child.onMouseDown(e, camera);
+            child.onMouseDown(e, this.camera);
         }
-    });
+    }.bind(this));
 };
 
 Property.prototype.onMouseMove = function (e) {
-    $.each(this.scene.children, function (i, child) {
+    this.scene.children.forEach(function (child) {
         if (child instanceof PhotoSphere) {
             child.onMouseMove(e);
         }
@@ -34,7 +32,7 @@ Property.prototype.onMouseMove = function (e) {
 };
 
 Property.prototype.onMouseUp = function (e) {
-    $.each(this.scene.children, function (i, child) {
+    this.scene.children.forEach(function (child) {
         if (child instanceof PhotoSphere) {
             child.onMouseUp(e);
         }
