@@ -9,10 +9,10 @@ Property = function () {
 
     this.renderer = new THREE.WebGLRenderer();
 
+    // This may need to change when we start moving to embedding the canvas into websites
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
-    this.light = new THREE.AmbientLight(0xffffff);
-    this.scene.add(this.light);
+    this.scene.add(new THREE.AmbientLight(0xffffff));
 };
 
 Property.prototype.onMouseDown = function (e) {
@@ -42,15 +42,33 @@ Property.prototype.onMouseUp = function (e) {
 Property.prototype.onMouseWheel = function (e) {
     e.preventDefault();
 
-    if (e.deltaY > 0) {
+    if (e.deltaY < 0) {
         this.camera.fov = Math.max(Property.FOV_MINIMUM, this.camera.fov / Property.SCALE);
 
         this.camera.updateProjectionMatrix();
-    } else if ( e.deltaY < 0) {
+    } else if ( e.deltaY > 0) {
         this.camera.fov = Math.min(Property.FOV_MAXIMUM, this.camera.fov * Property.SCALE);
 
         this.camera.updateProjectionMatrix();
     }
+};
+
+Property.prototype.bind = function () {
+    this.renderer.domElement.addEventListener(
+            "mousedown",
+            this.onMouseDown.bind(this));
+
+    this.renderer.domElement.addEventListener(
+            "mousemove",
+            this.onMouseMove.bind(this));
+
+    this.renderer.domElement.addEventListener(
+            "mouseup",
+            this.onMouseUp.bind(this));
+
+    this.renderer.domElement.addEventListener(
+            "mousewheel",
+            this.onMouseWheel.bind(this));
 };
 
 Property.prototype.render = function () {

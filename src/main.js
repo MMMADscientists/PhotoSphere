@@ -12,13 +12,7 @@ $(document).ready(function () {
 
     sphere.add(connection);
 
-    $(property.renderer.domElement).mousedown($.proxy(property.onMouseDown, property));
-
-    $(property.renderer.domElement).mousemove($.proxy(property.onMouseMove, property));
-
-    $(property.renderer.domElement).mouseup($.proxy(property.onMouseUp, property));
-
-    $(property.renderer.domElement).mousewheel($.proxy(property.onMouseWheel, property));
+    property.bind();
 
     var render = function () {
         requestAnimationFrame(render);

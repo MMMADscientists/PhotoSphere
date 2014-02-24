@@ -25,12 +25,12 @@ PhotoSphere.prototype = Object.create(THREE.Mesh.prototype);
 PhotoSphere.prototype.onMouseDown = function (e, camera) {
     if (!this.isRotating) {
         this.isRotating = true;
-        this.rotateStart.set(e.pageX, e.pageY);
+        this.rotateStart.set(e.clientX, e.clientY);
     }
 
     var mouse3D = new THREE.Vector3(
-            (e.pageX / window.innerWidth) * 2 - 1,
-            -(e.pageY / window.innerHeight) * 2 + 1,
+            (e.clientX / window.innerWidth) * 2 - 1,
+            -(e.clientY / window.innerHeight) * 2 + 1,
             0.5);
 
     this.projector.unprojectVector(mouse3D, camera);
@@ -39,13 +39,15 @@ PhotoSphere.prototype.onMouseDown = function (e, camera) {
         intersects = raycaster.intersectObjects(this.children);
 
     if (intersects.length > 0) {
+        console.log("Clicked object");
+        
         // Click code here
     }
 };
 
 PhotoSphere.prototype.onMouseMove = function (e) {
     if (this.isRotating) {
-        this.rotateEnd.set(e.pageX, e.pageY);
+        this.rotateEnd.set(e.clientX, e.clientY);
 
         var rotateDelta = new THREE.Vector2().subVectors(this.rotateEnd, this.rotateStart).divideScalar(750);
 
