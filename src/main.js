@@ -1,31 +1,47 @@
 $(document).ready(function () {
-    var FOV = 75,
-        ASPECT = window.innerWidth / window.innerHeight,
-        NEAR = 0.1,
-        FAR = 1000,
-        RADIUS = 25,
+    var property = new Property();
+
+    var RADIUS = 25,
         WIDTH_SEGMENTS = 50,
         HEIGHT_SEGMENTS = 50;
 
+    /*
     var scene = new THREE.Scene(),
         camera = new THREE.PerspectiveCamera(FOV, ASPECT, NEAR, FAR),
         projector = new THREE.Projector(),
         renderer = new THREE.WebGLRenderer();
 
     renderer.setSize(window.innerWidth, window.innerHeight);
-    $("body").append(renderer.domElement);
+    */
 
+    $("body").append(property.renderer.domElement);
+
+    //$("body").append(renderer.domElement);
+
+    /*
     var light = new THREE.AmbientLight(0xffffff);
     scene.add(light);
+    */
 
     var texture = THREE.ImageUtils.loadTexture($(".texture")[0].src),
         sphere = new PhotoSphere(RADIUS, WIDTH_SEGMENTS, HEIGHT_SEGMENTS, texture);
-    scene.add(sphere);
+
+    property.scene.add(sphere);
 
     var DOOR_ROUNDED_TEXTURE = THREE.ImageUtils.loadTexture($("#door")[0].src),
         connection = new Connection(new THREE.Vector3(0, 0, -10), 0, DOOR_ROUNDED_TEXTURE);
+
     sphere.add(connection);
 
+    $(property.renderer.domElement).mousedown($.proxy(property.onMouseDown, property));
+
+    $(property.renderer.domElement).mousemove($.proxy(property.onMouseMove, property));
+
+    $(property.renderer.domElement).mouseup($.proxy(property.onMouseUp, property));
+
+    $(property.renderer.domElement).mousewheel($.proxy(property.onMouseWheel, property));
+
+    /*
     var rotateStart = new THREE.Vector2(),
         rotateEnd = new THREE.Vector2(),
         rotateDelta = new THREE.Vector2(),
@@ -82,11 +98,22 @@ $(document).ready(function () {
             camera.updateProjectionMatrix();
         }
     });
+    */
 
+    /*
     var render = function () {
         requestAnimationFrame(render);
 
         renderer.render(scene, camera);
+    };
+
+    render();
+    */
+
+    var render = function () {
+        requestAnimationFrame(render);
+
+        property.render();
     };
 
     render();
