@@ -15,10 +15,17 @@ Property = function () {
     this.scene.add(new THREE.AmbientLight(0xffffff));
 };
 
+// See about combining touch/mouse events
 Property.prototype.onMouseDown = function (e) {
     this.scene.children.forEach(function (child) {
         if (child instanceof PhotoSphere) {
-            child.onMouseDown(e, this.camera);
+            child.startRotate(e.clientX, e.clientY);
+
+            var clickedConnections = child.getConnectionsClicked(e.clientX, e.clientY, this.camera);
+
+            if (clickedConnections.length > 0) {
+                console.log("Clicked!!");
+            }
         }
     }.bind(this));
 };
@@ -26,7 +33,7 @@ Property.prototype.onMouseDown = function (e) {
 Property.prototype.onMouseMove = function (e) {
     this.scene.children.forEach(function (child) {
         if (child instanceof PhotoSphere) {
-            child.onMouseMove(e);
+            child.rotate(e.clientX, e.clientY);
         }
     });
 };
@@ -34,7 +41,7 @@ Property.prototype.onMouseMove = function (e) {
 Property.prototype.onMouseUp = function (e) {
     this.scene.children.forEach(function (child) {
         if (child instanceof PhotoSphere) {
-            child.onMouseUp(e);
+            child.endRotate();
         }
     });
 };
@@ -53,6 +60,43 @@ Property.prototype.onMouseWheel = function (e) {
     }
 };
 
+Property.prototype.onTouchStart = function (e) {
+    var firstTouch = e.touches[0];
+
+    this.scene.children.forEach(function (child) {
+        if (child instanceof PhotoSphere) {
+            child.startRotate(firstTouch.clientX, firstTouch.clientY);
+
+            var clickedConnections = child.getConnectionsClicked(
+                firstTouch.clientX,
+                firstTouch.clientY,
+                this.camera);
+
+            if (clickedConnections.length > 0) {
+                console.log("Touched!!");
+            }
+        }
+    }.bind(this));
+};
+
+Property.prototype.onTouchMove = function (e) {
+    var firstTouch = e.touches[0];
+
+    this.scene.children.forEach(function (child) {
+        if (child instanceof PhotoSphere) {
+            child.rotate(firstTouch.clientX, firstTouch.clientY);
+        }
+    });
+};
+
+Property.prototype.onTouchEnd = function (e) {
+    this.scene.children.forEach(function (child) {
+        if (child instanceof PhotoSphere) {
+            child.endRotate();
+        }
+    });
+};
+
 Property.prototype.bind = function () {
     this.renderer.domElement.addEventListener(
             "mousedown",
@@ -69,6 +113,18 @@ Property.prototype.bind = function () {
     this.renderer.domElement.addEventListener(
             "mousewheel",
             this.onMouseWheel.bind(this));
+
+    this.renderer.domElement.addEventListener(
+            "touchstart",
+            this.onTouchStart.bind(this));
+
+    this.renderer.domElement.addEventListener(
+            "touchmove",
+            this.onTouchMove.bind(this));
+
+    this.renderer.domElement.addEventListener(
+            "touchend",
+            this.onTouchEnd.bind(this));
 };
 
 Property.prototype.render = function () {

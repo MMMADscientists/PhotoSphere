@@ -22,32 +22,29 @@ PhotoSphere = function (texture) {
 
 PhotoSphere.prototype = Object.create(THREE.Mesh.prototype);
 
-PhotoSphere.prototype.onMouseDown = function (e, camera) {
-    if (!this.isRotating) {
-        this.isRotating = true;
-        this.rotateStart.set(e.clientX, e.clientY);
-    }
-
+PhotoSphere.prototype.getConnectionsClicked = function (x, y, camera) {
     var mouse3D = new THREE.Vector3(
-            (e.clientX / window.innerWidth) * 2 - 1,
-            -(e.clientY / window.innerHeight) * 2 + 1,
+            (x / window.innerWidth) * 2 - 1,
+            -(y / window.innerHeight) * 2 + 1,
             0.5);
 
     this.projector.unprojectVector(mouse3D, camera);
 
-    var raycaster = new THREE.Raycaster(camera.position, mouse3D.sub(camera.position).normalize()),
-        intersects = raycaster.intersectObjects(this.children);
+    var raycaster = new THREE.Raycaster(camera.position, mouse3D.sub(camera.position).normalize());
 
-    if (intersects.length > 0) {
-        console.log("Clicked object");
-        
-        // Click code here
+    return raycaster.intersectObjects(this.children);
+};
+
+PhotoSphere.prototype.startRotate = function (x, y) {
+    if (!this.isRotating) {
+        this.isRotating = true;
+        this.rotateStart.set(x, y);
     }
 };
 
-PhotoSphere.prototype.onMouseMove = function (e) {
+PhotoSphere.prototype.rotate = function (x, y) {
     if (this.isRotating) {
-        this.rotateEnd.set(e.clientX, e.clientY);
+        this.rotateEnd.set(x, y);
 
         var rotateDelta = new THREE.Vector2().subVectors(this.rotateEnd, this.rotateStart).divideScalar(750);
 
@@ -58,17 +55,8 @@ PhotoSphere.prototype.onMouseMove = function (e) {
     }
 };
 
-PhotoSphere.prototype.onMouseUp = function (e) {
+PhotoSphere.prototype.endRotate = function () {
     this.isRotating = false;
-};
-
-PhotoSphere.prototype.intersects = function (camera, x, y) {
-    var mouse3D = new THREE.Vector3(
-            (x / window.innerWidth) * 2 - 1,
-            -(y / window.innerHeight) * 2 + 1,
-            0.5);
-
-    this.projector.unprojectVector(mouse3D, camera);
 };
 
 PhotoSphere.RADIUS = 25;
