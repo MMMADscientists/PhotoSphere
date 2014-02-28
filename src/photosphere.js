@@ -62,6 +62,15 @@ PhotoSphere.prototype.onMouseUp = function (e) {
     this.isRotating = false;
 };
 
+PhotoSphere.prototype.intersects = function (camera, x, y) {
+    var mouse3D = new THREE.Vector3(
+            (x / window.innerWidth) * 2 - 1,
+            -(y / window.innerHeight) * 2 + 1,
+            0.5);
+
+    this.projector.unprojectVector(mouse3D, camera);
+};
+
 PhotoSphere.RADIUS = 25;
 
 PhotoSphere.WIDTH_SEGMENTS = 50;
