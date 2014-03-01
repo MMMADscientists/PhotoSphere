@@ -1,8 +1,8 @@
-PhotoSphere = function (texture) {
+Room = function (texture) {
     var geometry = new THREE.SphereGeometry(
-            PhotoSphere.RADIUS,
-            PhotoSphere.WIDTH_SEGMENTS,
-            PhotoSphere.HEIGHT_SEGMENTS);
+            Room.RADIUS,
+            Room.WIDTH_SEGMENTS,
+            Room.HEIGHT_SEGMENTS);
 
     var material = new THREE.MeshLambertMaterial({ map: texture });
 
@@ -20,9 +20,9 @@ PhotoSphere = function (texture) {
     this.rotateEnd = new THREE.Vector2();
 };
 
-PhotoSphere.prototype = Object.create(THREE.Mesh.prototype);
+Room.prototype = Object.create(THREE.Mesh.prototype);
 
-PhotoSphere.prototype.getConnectionsClicked = function (x, y, camera) {
+Room.prototype.getConnectionsClicked = function (x, y, camera) {
     var mouse3D = new THREE.Vector3(
             (x / window.innerWidth) * 2 - 1,
             -(y / window.innerHeight) * 2 + 1,
@@ -35,14 +35,14 @@ PhotoSphere.prototype.getConnectionsClicked = function (x, y, camera) {
     return raycaster.intersectObjects(this.children);
 };
 
-PhotoSphere.prototype.startRotate = function (x, y) {
+Room.prototype.startRotate = function (x, y) {
     if (!this.isRotating) {
         this.isRotating = true;
         this.rotateStart.set(x, y);
     }
 };
 
-PhotoSphere.prototype.rotate = function (x, y) {
+Room.prototype.rotate = function (x, y) {
     if (this.isRotating) {
         this.rotateEnd.set(x, y);
 
@@ -55,12 +55,12 @@ PhotoSphere.prototype.rotate = function (x, y) {
     }
 };
 
-PhotoSphere.prototype.endRotate = function () {
+Room.prototype.endRotate = function () {
     this.isRotating = false;
 };
 
-PhotoSphere.RADIUS = 25;
+Room.RADIUS = 25;
 
-PhotoSphere.WIDTH_SEGMENTS = 50;
+Room.WIDTH_SEGMENTS = 50;
 
-PhotoSphere.HEIGHT_SEGMENTS = 50;
+Room.HEIGHT_SEGMENTS = 50;

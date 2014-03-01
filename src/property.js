@@ -13,10 +13,25 @@ Property = function () {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
     this.scene.add(new THREE.AmbientLight(0xffffff));
+
+    this.rooms = [];
+    this.currentRoom = null;
 };
 
 // See about combining touch/mouse events
 Property.prototype.onMouseDown = function (e) {
+    if (this.currentRoom !== null) {
+        var clickedConnections = this.currentRoom.getConnectionsClicked(
+                e.clientX,
+                e.clientY,
+                this.camera);
+
+        if (clickedConnections.length > 0) {
+            console.log("Clicked!!");
+        }
+    }
+
+    /*
     this.scene.children.forEach(function (child) {
         if (child instanceof PhotoSphere) {
             child.startRotate(e.clientX, e.clientY);
@@ -28,22 +43,35 @@ Property.prototype.onMouseDown = function (e) {
             }
         }
     }.bind(this));
+    */
 };
 
 Property.prototype.onMouseMove = function (e) {
+    if (this.currentRoom !== null) {
+        this.currentRoom.rotate(e.clientX, e.clientY);
+    }
+
+    /*
     this.scene.children.forEach(function (child) {
         if (child instanceof PhotoSphere) {
             child.rotate(e.clientX, e.clientY);
         }
     });
+    */
 };
 
 Property.prototype.onMouseUp = function (e) {
+    if (this.currentRoom !== null) {
+        this.currentRoom.endRotate();
+    }
+
+    /*
     this.scene.children.forEach(function (child) {
         if (child instanceof PhotoSphere) {
             child.endRotate();
         }
     });
+    */
 };
 
 Property.prototype.onMouseWheel = function (e) {
@@ -129,6 +157,20 @@ Property.prototype.bind = function () {
 
 Property.prototype.render = function () {
     this.renderer.render(this.scene, this.camera);
+};
+
+Property.prototype.addRoom = function (room) {
+    this.rooms.append(room);
+};
+
+Property.prototype.setCurrentRoom = function (index) {
+    if (this.currentRoom !== null) {
+        this.scene.remove(this.currentRoom);
+    }
+
+    this.currentRoom = this.rooms[index];
+
+    this.scene.add(this.currentRoom);
 };
 
 Property.FOV = 75;
