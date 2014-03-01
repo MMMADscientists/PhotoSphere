@@ -1,0 +1,38 @@
+{
+    "rooms": [
+        {
+            "name": "hallway",
+            "url": "test_images/hallway.jpg",
+            "connections": [
+                {
+                    "name": "living_room",
+                    "coordinates": [ 0, 0, 10 ]
+                },
+                {
+                    "name": "kitchen",
+                    "coordinates": [ 0, 0, -10 ]
+                }
+            ]
+        },
+        {
+            "name": "kitchen",
+            "url": "test_images/kitchen.jpg",
+            "connections": [
+                {
+                    "name": "hallway",
+                    "coordinates": [ 0, 0, -10 ]
+                }
+            ]
+        },
+        {
+            "name": "living_room",
+            "url": "test_images/living_room.jpg",
+            "connections": [
+                {
+                    "name": "hallway",
+                    "coordinates": [ 0, 0, -10 ]
+                }
+            ]
+        }
+    ]
+}
