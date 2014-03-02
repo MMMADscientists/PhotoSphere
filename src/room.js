@@ -1,4 +1,4 @@
-Room = function (texture) {
+Room = function (id, texture) {
     var geometry = new THREE.SphereGeometry(
             Room.RADIUS,
             Room.WIDTH_SEGMENTS,
@@ -10,6 +10,8 @@ Room = function (texture) {
     material.overdraw = true;
 
     THREE.Mesh.call(this, geometry, material);
+
+    this.id = id;
 
     this.projector = new THREE.Projector();
 

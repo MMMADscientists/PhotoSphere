@@ -1,4 +1,5 @@
 {
+    "default_room": "hallway",
     "rooms": [
         {
             "name": "hallway",
@@ -20,7 +21,7 @@
             "connections": [
                 {
                     "name": "hallway",
-                    "coordinates": [ 0, 0, -10 ]
+                    "coordinates": [ 0, 0, 10 ]
                 }
             ]
         },

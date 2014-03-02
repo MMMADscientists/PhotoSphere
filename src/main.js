@@ -41,10 +41,8 @@ $(document).ready(function () {
     });
 
     property.setCurrentRoom(0);
-    */
 
-    var DOOR_ROUNDED_TEXTURE = THREE.ImageUtils.loadTexture($("#door")[0].src);
-    /*
+    var DOOR_ROUNDED_TEXTURE = THREE.ImageUtils.loadTexture($("#door")[0].src),
         connection = new Connection(new THREE.Vector3(0, 0, -10), 0, DOOR_ROUNDED_TEXTURE);
 
     sphere.add(connection);

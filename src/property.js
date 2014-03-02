@@ -15,65 +15,34 @@ Property = function () {
     this.scene.add(new THREE.AmbientLight(0xffffff));
 
     this.rooms = {};
+
     this.currentRoom = null;
 };
 
-// See about combining touch/mouse events
-Property.prototype.onMouseDown = function (e) {
+Property.prototype.onPress = function (x, y) {
     if (this.currentRoom !== null) {
-        this.currentRoom.startRotate(e.clientX, e.clientY);
+        this.currentRoom.startRotate(x, y);
 
-        var clickedConnections = this.currentRoom.getConnectionsClicked(
-                e.clientX,
-                e.clientY,
-                this.camera);
+        var clickedConnections = this.currentRoom.getConnectionsClicked(x, y, this.camera);
 
         if (clickedConnections.length > 0) {
-            console.log("Clicked!!");
+            var connection = clickedConnections[0];
+
+            this.setCurrentRoom(connection.object.destinationID);
         }
     }
-
-    /*
-    this.scene.children.forEach(function (child) {
-        if (child instanceof PhotoSphere) {
-            child.startRotate(e.clientX, e.clientY);
-
-            var clickedConnections = child.getConnectionsClicked(e.clientX, e.clientY, this.camera);
-
-            if (clickedConnections.length > 0) {
-                console.log("Clicked!!");
-            }
-        }
-    }.bind(this));
-    */
 };
 
-Property.prototype.onMouseMove = function (e) {
+Property.prototype.onMove = function (x, y) {
     if (this.currentRoom !== null) {
-        this.currentRoom.rotate(e.clientX, e.clientY);
+        this.currentRoom.rotate(x, y);
     }
-
-    /*
-    this.scene.children.forEach(function (child) {
-        if (child instanceof PhotoSphere) {
-            child.rotate(e.clientX, e.clientY);
-        }
-    });
-    */
 };
 
-Property.prototype.onMouseUp = function (e) {
+Property.prototype.onRelease = function () {
     if (this.currentRoom !== null) {
         this.currentRoom.endRotate();
     }
-
-    /*
-    this.scene.children.forEach(function (child) {
-        if (child instanceof PhotoSphere) {
-            child.endRotate();
-        }
-    });
-    */
 };
 
 Property.prototype.onMouseWheel = function (e) {
@@ -90,84 +59,30 @@ Property.prototype.onMouseWheel = function (e) {
     }
 };
 
-Property.prototype.onTouchStart = function (e) {
-    var firstTouch = e.touches[0];
-
-    if (this.currentRoom !== null) {
-        this.currentRoom.startRotate(
-                firstTouch.clientX,
-                firstTouch.clientY);
-
-        var clickedConnections = this.currentRoom.getConnectionsClicked(
-                firstTouch.clientX,
-                firstTouch.clientY,
-                this.camera);
-
-        if (clickedConnections.length > 0) {
-            console.log("Touched!!");
-        }
-    }
-
-    /*
-    this.scene.children.forEach(function (child) {
-        if (child instanceof PhotoSphere) {
-            child.startRotate(firstTouch.clientX, firstTouch.clientY);
-
-            var clickedConnections = child.getConnectionsClicked(
-                firstTouch.clientX,
-                firstTouch.clientY,
-                this.camera);
-
-            if (clickedConnections.length > 0) {
-                console.log("Touched!!");
-            }
-        }
-    }.bind(this));
-    */
-};
-
-Property.prototype.onTouchMove = function (e) {
-    var firstTouch = e.touches[0];
-
-    if (this.currentRoom !== null) {
-        this.currentRoom.rotate(firstTouch.clientX, firstTouch.clientY);
-    }
-
-    /*
-    this.scene.children.forEach(function (child) {
-        if (child instanceof PhotoSphere) {
-            child.rotate(firstTouch.clientX, firstTouch.clientY);
-        }
-    });
-    */
-};
-
-Property.prototype.onTouchEnd = function (e) {
-    if (this.currentRoom !== null) {
-        this.currentRoom.endRotate();
-    }
-
-    /*
-    this.scene.children.forEach(function (child) {
-        if (child instanceof PhotoSphere) {
-            child.endRotate();
-        }
-    });
-    */
-};
-
 Property.prototype.bind = function () {
     this.renderer.domElement.addEventListener(
             "mousedown",
-            this.onMouseDown.bind(this));
+            function (e) {
+                this.onPress(e.clientX, e.clientY);
+            }.bind(this));
 
     this.renderer.domElement.addEventListener(
             "mousemove",
-            this.onMouseMove.bind(this));
+            function (e) {
+                this.onMove(e.clientX, e.clientY);
+            }.bind(this));
 
     this.renderer.domElement.addEventListener(
             "mouseup",
-            this.onMouseUp.bind(this));
+            function (e) {
+                this.onRelease(e.clientX, e.clientY);
+            }.bind(this));
+
+    this.renderer.domElement.addEventListener(
+            "mouseout",
+            function (e) {
+                this.onRelease(e.clientX, e.clientY);
+            }.bind(this));
 
     this.renderer.domElement.addEventListener(
             "mousewheel",
@@ -175,15 +90,35 @@ Property.prototype.bind = function () {
 
     this.renderer.domElement.addEventListener(
             "touchstart",
-            this.onTouchStart.bind(this));
+            function (e) {
+                var t = e.touches[0];
+
+                this.onPress(t.clientX, t.clientY);
+            }.bind(this));
 
     this.renderer.domElement.addEventListener(
             "touchmove",
-            this.onTouchMove.bind(this));
+            function (e) {
+                var t = e.touches[0];
+
+                this.onMove(t.clientX, t.clientY);
+            }.bind(this));
 
     this.renderer.domElement.addEventListener(
             "touchend",
-            this.onTouchEnd.bind(this));
+            function (e) {
+                var t = e.touches[0];
+
+                this.onRelease(t.clientX, t.clientY);
+            }.bind(this));
+
+    this.renderer.domElement.addEventListener(
+            "touchleave",
+            function (e) {
+                var t = e.touches[0];
+
+                this.onRelease(t.clientX, t.clientY);
+            }.bind(this));
 };
 
 Property.prototype.render = function () {
@@ -226,11 +161,14 @@ Property.fromJSON = function (url) {
 
         dataType: "json",
 
+        // TODO: Figure out how to remove the synchronocity
         async: false,
 
         success: function (result) {
             result.rooms.forEach(function (roomData) {
-                var room = new Room(THREE.ImageUtils.loadTexture(roomData.url));
+                var room = new Room(
+                    roomData.name,
+                    THREE.ImageUtils.loadTexture(roomData.url));
 
                 roomData.connections.forEach(function (connData) {
                     var loc = new THREE.Vector3();
@@ -243,7 +181,7 @@ Property.fromJSON = function (url) {
                 property.addRoom(roomData.name, room);
             })
 
-            property.setCurrentRoom("hallway");
+            property.setCurrentRoom(result.default_room);
         },
 
         error: function (request, textStatus, errorThrown) {
