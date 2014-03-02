@@ -21,7 +21,7 @@
             "connections": [
                 {
                     "name": "hallway",
-                    "coordinates": [ 0, 0, 10 ]
+                    "coordinates": [ -5, 0, 5 ]
                 }
             ]
         },
