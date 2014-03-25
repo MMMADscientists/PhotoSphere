@@ -1,5 +1,9 @@
 $(document).ready(function () {
+    var property = Property.fromWebpage();
+
+    /*
     var property = Property.fromJSON("test_property.json");
+    */
 
     $("body").append(property.renderer.domElement);
 

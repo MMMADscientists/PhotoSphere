@@ -196,3 +196,19 @@ Property.fromJSON = function (url) {
 
     return property;
 };
+
+Property.fromWebpage = function (imageClass) {
+    imageClass = imageClass || ".texture";
+
+    var property = new Property();
+
+    $(imageClass).each(function () {
+        var room = new Room(this.id, THREE.ImageUtils.loadTexture(this.src));
+
+        property.addRoom(this.id, room);
+
+        property.setCurrentRoom(this.id);
+    });
+
+    return property;
+};
