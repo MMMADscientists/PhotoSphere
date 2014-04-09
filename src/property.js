@@ -17,6 +17,8 @@ Property = function () {
     this.rooms = {};
 
     this.currentRoom = null;
+
+    this.lock = false;
 };
 
 Property.prototype.onPress = function (x, y) {
@@ -59,7 +61,67 @@ Property.prototype.onMouseWheel = function (e) {
     }
 };
 
+Property.prototype.onEditConnection = function (x, y) {
+    if (this.currentRoom !== null) {
+        this.lock = true;
+
+        var clickedConnections = this.currentRoom.getConnectionsClicked(x, y, this.camera);
+
+        if (clickedConnections.length > 0) {
+            // Edit the connection
+            var connection = clickedConnections[0];
+
+            var editEvent = new CustomEvent(
+                    "propertyEdit", {
+                        destinationID: connection.destinationID
+                    });
+
+            /*
+            // Dispatch event to UI JavaScript
+            UI.dispatchEvent(editEvent);
+
+            // Dispatch event to applications using JockeyJS
+            Jockey.send(
+                "propertyEdit", {
+                    "destinationID": connection.destinationID
+                }, function () {
+                    console.log("Applications have received propertyEdit!");
+                });
+            */
+        } else {
+            var createEvent = new Event("propertyCreate");
+
+            // Dispatch event to UI JavaScript
+            window.dispatchEvent(createEvent);
+
+            console.log("Dispatched propertyCreate Event");
+
+            /*
+            // Dispatch event to applications using JockeyJS
+            Jockey.send(
+                "propertyCreate", {
+                    destinationID: connection.destinationID
+                }, function () {
+                    console.log("Applications have received propertyCreate!");
+                });
+            */
+        }
+    }
+};
+
+Property.prototype.onEditComplete = function (e) {
+};
+
+Property.prototype.onCreateComplete = function (e) {
+};
+
 Property.prototype.bind = function () {
+    this.renderer.domElement.addEventListener(
+            "dblclick",
+            function (e) {
+                this.onEditConnection(e.clientX, e.clientY);
+            }.bind(this));
+
     this.renderer.domElement.addEventListener(
             "mousedown",
             function (e) {
@@ -208,6 +270,52 @@ Property.fromWebpage = function (imageClass) {
         property.addRoom(this.id, room);
 
         property.setCurrentRoom(this.id);
+    });
+
+    return property;
+};
+
+Property.load = function (url) {
+    var property = new Property();
+
+    $.ajax({
+        url: url,
+
+        dataType: "json",
+
+        // TODO: Figure out how to remove the synchronocity
+        async: false,
+
+        success: function (result) {
+            result.rooms.forEach(function (roomData) {
+                var src = $("#" + roomData.name).src
+
+                var room = new Room(
+                    roomData.name,
+                    THREE.ImageUtils.loadTexture(src));
+
+                roomData.connections.forEach(function (connData) {
+                    var loc = new THREE.Vector3();
+
+                    room.add(new Connection(
+                            loc.fromArray(connData.coordinates),
+                            connData.name));
+                });
+
+                property.addRoom(roomData.name, room);
+            })
+
+            property.setCurrentRoom(result.default_room);
+        },
+
+        error: function (request, textStatus, errorThrown) {
+            console.log("An error has occurred while retrieving the JSON...");
+            console.log(textStatus);
+        },
+
+        complete: function (request, textStatus) {
+            console.log("JSON request complete!!");
+        },
     });
 
     return property;

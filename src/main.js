@@ -1,7 +1,9 @@
 $(document).ready(function () {
-    var property = Property.fromWebpage();
+    var property = Property.load("test_property.json");
 
     /*
+    var property = Property.fromWebpage();
+
     var property = Property.fromJSON("test_property.json");
     */
 
