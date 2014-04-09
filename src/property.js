@@ -288,7 +288,7 @@ Property.load = function (url) {
 
         success: function (result) {
             result.rooms.forEach(function (roomData) {
-                var src = $("#" + roomData.name).src
+                var src = $("#" + roomData.name)[0].src
 
                 var room = new Room(
                     roomData.name,
