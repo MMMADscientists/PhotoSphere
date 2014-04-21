@@ -7,10 +7,16 @@ Property = function () {
             Property.NEAR,
             Property.FAR);
 
-    this.renderer = new THREE.WebGLRenderer();
+    if ($("#viewer").length > 0) {
+        var canvas = $("#viewer")[0];
 
-    // This may need to change when we start moving to embedding the canvas into websites
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer = new THREE.WebGLRenderer({ canvas: canvas });
+        this.renderer.setSize(canvas.width, canvas.height);
+    } else {
+        this.renderer = new THREE.WebGLRenderer();
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        $("body").append(this.renderer.domElement);
+    }
 
     this.scene.add(new THREE.AmbientLight(0xffffff));
 
@@ -265,6 +271,8 @@ Property.fromWebpage = function (imageClass) {
     var property = new Property();
 
     $(imageClass).each(function () {
+        console.log(this.crossOrigin);
+
         var room = new Room(this.id, THREE.ImageUtils.loadTexture(this.src));
 
         property.addRoom(this.id, room);

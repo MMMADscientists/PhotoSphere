@@ -1,5 +1,13 @@
 $(document).ready(function () {
-    var property = Property.load("test_property.json");
+    THREE.ImageUtils.crossOrigin = "anonymous";
+
+    $(".texture").each(function () {
+        console.log("In main");
+        console.log(this.crossOrigin);
+        this.crossOrigin = "";
+    });
+
+    var property = Property.fromWebpage();
 
     /*
     var property = Property.fromWebpage();
@@ -7,7 +15,6 @@ $(document).ready(function () {
     var property = Property.fromJSON("test_property.json");
     */
 
-    $("body").append(property.renderer.domElement);
 
     property.bind();
 
