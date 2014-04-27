@@ -1,5 +1,5 @@
 $(document).ready(function () {
     window.addEventListener("propertyCreate", function (e) {
-        console.log("Caught propertyCreate Event");
+        console.log("Caught propertyCreate Event", e);
     }, false);
 });

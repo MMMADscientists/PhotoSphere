@@ -1,20 +1,29 @@
 Property = function () {
     this.scene = new THREE.Scene();
+       
+    if ($("#viewer").length > 0) {
+        var canvas = $("#viewer")[0];
 
-    this.camera = new THREE.PerspectiveCamera(
+        this.camera = new THREE.PerspectiveCamera(
+            Property.FOV,
+            canvas.width / canvas.height,
+            Property.NEAR,
+            Property.FAR);
+
+        this.renderer = new THREE.CanvasRenderer({ canvas: canvas });
+
+        this.renderer.setSize(canvas.width, canvas.height);
+    } else {
+        this.camera = new THREE.PerspectiveCamera(
             Property.FOV,
             Property.ASPECT,
             Property.NEAR,
             Property.FAR);
 
-    if ($("#viewer").length > 0) {
-        var canvas = $("#viewer")[0];
+        this.renderer = new THREE.CanvasRenderer();
 
-        this.renderer = new THREE.WebGLRenderer({ canvas: canvas });
-        this.renderer.setSize(canvas.width, canvas.height);
-    } else {
-        this.renderer = new THREE.WebGLRenderer();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
+
         $("body").append(this.renderer.domElement);
     }
 
@@ -25,19 +34,34 @@ Property = function () {
     this.currentRoom = null;
 
     this.lock = false;
+
+    this.holding = false;
+};
+
+Property.prototype.onClick = function (x, y) {
+    if (this.holding) {
+        this.holding = false;
+        return;
+    }
+
+    if (this.currentRoom !== null) {
+    console.log("onClick");
+
+    var clickedConnections = this.currentRoom.getConnectionsClicked(x, y, this.camera, this.renderer.domElement);
+
+    if (clickedConnections.intersections.length > 0 && clickedConnections.intersections[0].object instanceof Connection) {
+        var connection = clickedConnections.intersections[0];
+
+        this.setCurrentRoom(connection.object.destinationID);
+    }
+    }
 };
 
 Property.prototype.onPress = function (x, y) {
     if (this.currentRoom !== null) {
+        console.log("onPress");
+
         this.currentRoom.startRotate(x, y);
-
-        var clickedConnections = this.currentRoom.getConnectionsClicked(x, y, this.camera);
-
-        if (clickedConnections.length > 0) {
-            var connection = clickedConnections[0];
-
-            this.setCurrentRoom(connection.object.destinationID);
-        }
     }
 };
 
@@ -71,63 +95,73 @@ Property.prototype.onEditConnection = function (x, y) {
     if (this.currentRoom !== null) {
         this.lock = true;
 
-        var clickedConnections = this.currentRoom.getConnectionsClicked(x, y, this.camera);
+        var clickedConnections = this.currentRoom.getConnectionsClicked(x, y, this.camera, this.renderer.domElement);
 
-        if (clickedConnections.length > 0) {
+        console.log(clickedConnections);
+
+        if (clickedConnections.intersections.length > 0 && clickedConnections.intersections[0].object instanceof Connection) {
             // Edit the connection
-            var connection = clickedConnections[0];
+            var connection = clickedConnections.intersections[0];
 
             var editEvent = new CustomEvent(
                     "propertyEdit", {
-                        destinationID: connection.destinationID
+                        detail: {
+                            id: connection.id,
+                        },
                     });
 
-            /*
-            // Dispatch event to UI JavaScript
-            UI.dispatchEvent(editEvent);
+            window.dispatchEvent(editEvent);
 
             // Dispatch event to applications using JockeyJS
             Jockey.send(
                 "propertyEdit", {
-                    "destinationID": connection.destinationID
+                    id: connection.id,
                 }, function () {
                     console.log("Applications have received propertyEdit!");
                 });
-            */
+
+            console.log("Dispatched propertyEdit Event");
         } else {
-            var createEvent = new Event("propertyCreate");
+            var point = clickedConnections.ray.direction.normalize().multiplyScalar(clickedConnections.intersections[0].distance - 10);
+
+            var rot = this.currentRoom.rotation.clone();
+            rot.y *= -1;
+
+            var quaternion = new THREE.Quaternion();
+            quaternion.setFromEuler(rot);
+
+            point.applyQuaternion(quaternion);
+/*
+                xRotationMatrix = new THREE.Matrix4().makeRotationX(this.currentRoom.rotation.x),
+                yRotationMatrix = new THREE.Matrix4().makeRotationY(this.currentRoom.rotation.y);
+*/
+
+
+            //var point = clickedConnections[0].point;
+
+            console.log("point", point);
+
+            var createEvent = new CustomEvent("propertyCreate", { detail: { x: point.x, y: point.y, z: point.z } });
 
             // Dispatch event to UI JavaScript
             window.dispatchEvent(createEvent);
 
             console.log("Dispatched propertyCreate Event");
 
-            /*
             // Dispatch event to applications using JockeyJS
             Jockey.send(
                 "propertyCreate", {
-                    destinationID: connection.destinationID
+                    x: point.x,
+                    y: point.y,
+                    z: point.z,
                 }, function () {
                     console.log("Applications have received propertyCreate!");
                 });
-            */
         }
     }
 };
 
-Property.prototype.onEditComplete = function (e) {
-};
-
-Property.prototype.onCreateComplete = function (e) {
-};
-
 Property.prototype.bind = function () {
-    this.renderer.domElement.addEventListener(
-            "dblclick",
-            function (e) {
-                this.onEditConnection(e.clientX, e.clientY);
-            }.bind(this));
-
     this.renderer.domElement.addEventListener(
             "mousedown",
             function (e) {
@@ -155,6 +189,12 @@ Property.prototype.bind = function () {
     this.renderer.domElement.addEventListener(
             "mousewheel",
             this.onMouseWheel.bind(this));
+
+    this.renderer.domElement.addEventListener(
+            "click",
+            function (e) {
+                this.onClick(e.clientX, e.clientY);
+            }.bind(this));
 
     this.renderer.domElement.addEventListener(
             "touchstart",
@@ -186,6 +226,18 @@ Property.prototype.bind = function () {
                 var t = e.touches[0];
 
                 this.onRelease(t.clientX, t.clientY);
+            }.bind(this));
+
+    Hammer(this.renderer.domElement).on(
+            "hold",
+            function (e) {
+                console.log("HOLDING");
+
+                this.holding = true;
+
+                var t = e.gesture.touches[0];
+
+                this.onEditConnection(t.clientX, t.clientY);
             }.bind(this));
 };
 
@@ -221,110 +273,32 @@ Property.FOV_MINIMUM = 5;
 
 Property.FOV_MAXIMUM = 75;
 
-Property.fromJSON = function (url) {
-    var property = new Property();
-
-    $.ajax({
-        url: url,
-
-        dataType: "json",
-
-        // TODO: Figure out how to remove the synchronocity
-        async: false,
-
-        success: function (result) {
-            result.rooms.forEach(function (roomData) {
-                var room = new Room(
-                    roomData.name,
-                    THREE.ImageUtils.loadTexture(roomData.url));
-
-                roomData.connections.forEach(function (connData) {
-                    var loc = new THREE.Vector3();
-
-                    room.add(new Connection(
-                            loc.fromArray(connData.coordinates),
-                            connData.name));
-                });
-
-                property.addRoom(roomData.name, room);
-            })
-
-            property.setCurrentRoom(result.default_room);
-        },
-
-        error: function (request, textStatus, errorThrown) {
-            console.log("An error has occurred while retrieving the JSON...");
-            console.log(textStatus);
-        },
-
-        complete: function (request, textStatus) {
-            console.log("JSON request complete!!");
-        },
-    });
-
-    return property;
-};
-
 Property.fromWebpage = function (imageClass) {
     imageClass = imageClass || ".texture";
 
     var property = new Property();
 
     $(imageClass).each(function () {
-        console.log(this.crossOrigin);
-
         var room = new Room(this.id, THREE.ImageUtils.loadTexture(this.src));
+
+        var connections = metadata[this.id];
+
+        connections.forEach(function (conn) {
+            console.log("Connection position", conn.idConnection, conn.doorX, conn.doorY, conn.doorZ);
+
+            var loc = new THREE.Vector3(parseFloat(conn.doorX), parseFloat(conn.doorY), parseFloat(conn.doorZ));
+
+            room.add(new Connection(loc, conn.idDestination, conn.idConnection));
+        });
 
         property.addRoom(this.id, room);
 
         property.setCurrentRoom(this.id);
     });
 
-    return property;
-};
-
-Property.load = function (url) {
-    var property = new Property();
-
-    $.ajax({
-        url: url,
-
-        dataType: "json",
-
-        // TODO: Figure out how to remove the synchronocity
-        async: false,
-
-        success: function (result) {
-            result.rooms.forEach(function (roomData) {
-                var src = $("#" + roomData.name)[0].src
-
-                var room = new Room(
-                    roomData.name,
-                    THREE.ImageUtils.loadTexture(src));
-
-                roomData.connections.forEach(function (connData) {
-                    var loc = new THREE.Vector3();
-
-                    room.add(new Connection(
-                            loc.fromArray(connData.coordinates),
-                            connData.name));
-                });
-
-                property.addRoom(roomData.name, room);
-            })
-
-            property.setCurrentRoom(result.default_room);
-        },
-
-        error: function (request, textStatus, errorThrown) {
-            console.log("An error has occurred while retrieving the JSON...");
-            console.log(textStatus);
-        },
-
-        complete: function (request, textStatus) {
-            console.log("JSON request complete!!");
-        },
-    });
+    if (defaultRoom !== "") {
+        property.setCurrentRoom(defaultRoom);
+    }
 
     return property;
 };
