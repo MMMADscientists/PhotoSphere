@@ -10,7 +10,7 @@ Property = function () {
             Property.NEAR,
             Property.FAR);
 
-        this.renderer = new THREE.CanvasRenderer({ canvas: canvas });
+        this.renderer = new THREE.WebGLRenderer({ canvas: canvas });
 
         this.renderer.setSize(canvas.width, canvas.height);
     } else {
@@ -45,22 +45,18 @@ Property.prototype.onClick = function (x, y) {
     }
 
     if (this.currentRoom !== null) {
-    console.log("onClick");
+        var clickedConnections = this.currentRoom.getConnectionsClicked(x, y, this.camera, this.renderer.domElement);
 
-    var clickedConnections = this.currentRoom.getConnectionsClicked(x, y, this.camera, this.renderer.domElement);
+        if (clickedConnections.intersections.length > 0 && clickedConnections.intersections[0].object instanceof Connection) {
+            var connection = clickedConnections.intersections[0];
 
-    if (clickedConnections.intersections.length > 0 && clickedConnections.intersections[0].object instanceof Connection) {
-        var connection = clickedConnections.intersections[0];
-
-        this.setCurrentRoom(connection.object.destinationID);
-    }
+            this.setCurrentRoom(connection.object.destinationID);
+        }
     }
 };
 
 Property.prototype.onPress = function (x, y) {
     if (this.currentRoom !== null) {
-        console.log("onPress");
-
         this.currentRoom.startRotate(x, y);
     }
 };
@@ -97,8 +93,6 @@ Property.prototype.onEditConnection = function (x, y) {
 
         var clickedConnections = this.currentRoom.getConnectionsClicked(x, y, this.camera, this.renderer.domElement);
 
-        console.log(clickedConnections);
-
         if (clickedConnections.intersections.length > 0 && clickedConnections.intersections[0].object instanceof Connection) {
             // Edit the connection
             var connection = clickedConnections.intersections[0];
@@ -106,7 +100,7 @@ Property.prototype.onEditConnection = function (x, y) {
             var editEvent = new CustomEvent(
                     "propertyEdit", {
                         detail: {
-                            id: connection.id,
+                            id: connection.object.connectionID,
                         },
                     });
 
@@ -115,7 +109,7 @@ Property.prototype.onEditConnection = function (x, y) {
             // Dispatch event to applications using JockeyJS
             Jockey.send(
                 "propertyEdit", {
-                    id: connection.id,
+                    id: connection.object.connectionID,
                 }, function () {
                     console.log("Applications have received propertyEdit!");
                 });
@@ -131,15 +125,6 @@ Property.prototype.onEditConnection = function (x, y) {
             quaternion.setFromEuler(rot);
 
             point.applyQuaternion(quaternion);
-/*
-                xRotationMatrix = new THREE.Matrix4().makeRotationX(this.currentRoom.rotation.x),
-                yRotationMatrix = new THREE.Matrix4().makeRotationY(this.currentRoom.rotation.y);
-*/
-
-
-            //var point = clickedConnections[0].point;
-
-            console.log("point", point);
 
             var createEvent = new CustomEvent("propertyCreate", { detail: { x: point.x, y: point.y, z: point.z } });
 
@@ -231,8 +216,6 @@ Property.prototype.bind = function () {
     Hammer(this.renderer.domElement).on(
             "hold",
             function (e) {
-                console.log("HOLDING");
-
                 this.holding = true;
 
                 var t = e.gesture.touches[0];
@@ -284,8 +267,6 @@ Property.fromWebpage = function (imageClass) {
         var connections = metadata[this.id];
 
         connections.forEach(function (conn) {
-            console.log("Connection position", conn.idConnection, conn.doorX, conn.doorY, conn.doorZ);
-
             var loc = new THREE.Vector3(parseFloat(conn.doorX), parseFloat(conn.doorY), parseFloat(conn.doorZ));
 
             room.add(new Connection(loc, conn.idDestination, conn.idConnection));

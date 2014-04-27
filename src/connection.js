@@ -1,6 +1,4 @@
 Connection = function (position, destinationID, id, texture) {
-    this.id = id;
-
     texture = texture || THREE.ImageUtils.loadTexture($("#door")[0].src);
 
     var geometry = new THREE.PlaneGeometry(1, 2),
@@ -12,6 +10,7 @@ Connection = function (position, destinationID, id, texture) {
 
     this.position = position;
     this.destinationID = destinationID;
+    this.connectionID = id;
 
     var direction = new THREE.Vector3().subVectors(new THREE.Vector3(0, 0, 1), this.position);
 

@@ -29,8 +29,6 @@ Room.prototype = Object.create(THREE.Mesh.prototype);
 Room.prototype.getConnectionsClicked = function (x, y, camera, canvas) {
     var canvasParent = canvas.parentNode;
 
-    console.log("click", x, y, canvas.offsetLeft, canvas.offsetTop, canvas.width, canvas.height);
-
     var mouse3D = new THREE.Vector3(
             ((x - canvas.offsetLeft) / canvas.width) * 2 - 1,
             -((y - canvas.offsetTop) / canvas.height) * 2 + 1,
